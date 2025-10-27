@@ -290,17 +290,17 @@ void resetBrake(){
 void brake() {
   brakeSet = true;
   // 3 flashes then stays on till brake is released
-  unsigned long currentMillis = millis();                 // Get the current time, local variable
+  unsigned long currentMillis = millis();           // Get the current time, local variable
   if (isBraking && (isRBlinking || isLBlinking)) {
     if (isRBlinking) {
-      fill_solid(leds[1],9,CRGB::Color_high);           // Set left side brake lights on
-      fill_solid(leds[3],8,CRGB::Color_high);           // Set left side brake lights on
-      fill_solid(leds[5],6,CRGB::Color_high);           // Set left side brake lights on
+      fill_solid(leds[1],9,CRGB::Color_high);       // Set left side brake lights on
+      fill_solid(leds[3],8,CRGB::Color_high);       // Set left side brake lights on
+      fill_solid(leds[5],6,CRGB::Color_high);       // Set left side brake lights on
     }
     if (isLBlinking) {
-      fill_solid(leds[0],9,CRGB::Color_high);           // Set right side brake lights on
-      fill_solid(leds[2],8,CRGB::Color_high);           // Set right side brake lights on
-      fill_solid(leds[4],6,CRGB::Color_high);           // Set right side brake lights on
+      fill_solid(leds[0],9,CRGB::Color_high);       // Set right side brake lights on
+      fill_solid(leds[2],8,CRGB::Color_high);       // Set right side brake lights on
+      fill_solid(leds[4],6,CRGB::Color_high);       // Set right side brake lights on
     }
   } else if (isBraking){                                  // If brake is active
     if (currentMillis - brakeMillis > brakeFlashMillis) { // Check elapsed time since last flash
@@ -308,9 +308,9 @@ void brake() {
       if(brakeCounter < 7) {                              // Check if we are still in the flashing phase, number is double the number of flashes
         brakeCounter++;                                   // Increment the brake flash counter  
       }
-      brakeMillis = currentMillis;                        // Update last flash time to current time  
+      brakeMillis = currentMillis;                   // Update last flash time to current time  
     }
-    if (flash == 1) {                                     // If flash state is on
+    if (flash == 1) {                                // If flash state is on, turn on all LEDs
         fill_solid(leds[0],9,CRGB::Color_high);
         fill_solid(leds[2],8,CRGB::Color_high);
         fill_solid(leds[4],6,CRGB::Color_high);
@@ -318,17 +318,17 @@ void brake() {
         fill_solid(leds[3],8,CRGB::Color_high);
         fill_solid(leds[5],6,CRGB::Color_high);
       } else {
-      if (brakeCounter <= 6) {
-        if (isLBlinking){
+      if (brakeCounter <= 6) {                       // During flashing phase, turn off all LEDs until we exceed the counter
+        if (isLBlinking){                            // If left turn is active, only turn off righ side LEDs 
           fill_solid(leds[0],9,CRGB::Black);
           fill_solid(leds[2],8,CRGB::Black);
           fill_solid(leds[4],6,CRGB::Black);
-        } else if (isRBlinking){
+        } else if (isRBlinking){                     // If right turn is active, only turn off left side LEDs
           fill_solid(leds[1],9,CRGB::Black);
           fill_solid(leds[3],8,CRGB::Black);
           fill_solid(leds[5],6,CRGB::Black);
           } else {
-          fill_solid(leds[0],9,CRGB::Black);
+          fill_solid(leds[0],9,CRGB::Black);         // If no turn signals active, turn off all LEDs
           fill_solid(leds[2],8,CRGB::Black);
           fill_solid(leds[4],6,CRGB::Black);
           fill_solid(leds[1],9,CRGB::Black);
@@ -356,7 +356,7 @@ void rightTurn() {
     }
     unsigned long currentMillis = millis();          // Get the current time, local variable
     if (currentMillis - lastBlinkRTime >= interval){ // Check elapsed time since last blink
-      lastBlinkRTime = currentMillis;              // Update last blink time to current time
+      lastBlinkRTime = currentMillis;                // Update last blink time to current time
       current_led--;
       if (current_led >= 0){
         leds[0][current_led]=CRGB::Red;
@@ -369,7 +369,7 @@ void rightTurn() {
         }
       }
       FastLED.show();
-      } else if (current_led < 0){
+      } else if (current_led < 0){              // If all LEDs have been lit turn them off and reset
         current_led=NUM_LEDS;
         fill_solid(leds[0],9,CRGB::Black);
         fill_solid(leds[2],8,CRGB::Black);

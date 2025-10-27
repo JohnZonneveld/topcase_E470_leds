@@ -1,4 +1,4 @@
-﻿# topcase\_VE70\_leds
+﻿# topcase\_E470\_leds
 
 Motorcycle Top Box Brake And Turn Signal Lights
 V1.0  2025 Author: John Zonneveld
@@ -50,4 +50,5 @@ strip up and the pulse monitoring before dropping the turn signal
 This will be the view when system is in rest (no inputs from signals or brake)
 
 ![img](e470_runninglights.PNG)
+
 

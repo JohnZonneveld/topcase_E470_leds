@@ -43,6 +43,10 @@ For this setup we need to bring 5 wires to the box:
 * Right turnsignal
 * Brake light
   I bought some water proof connecters but also a 5 pin trailer wiring harness. which I probably hide somewhere under the seat.
+  I did buy a Plug&Play wiring harness from Admore Lighting, installation on my 2014 C14 was done within 30 minutes.
+  For this I needed to remove the toolbox, 4x 4mm allen bolts. Remove a clipped on fusebox from the toolbox. Behind the toolbox is the ECU that is just resting on some rubbers. To remove the ECU there is no need to disconnect the cables, just lift it and pull forward.
+  There is also a plastic cover around this section, not sure what the function is but it is only mounted with 2 5mm allen bolt on the front and slid into the tail section. Remove the bolts and pull it forward to remove.
+  Now you will gain access to the tail where a rubber boot is with all the connections for the turn signals and tail/brake light. The admore kit just plugs in between the existing plugs. According to Admore this should be able to provide 2A for additional lighting.
 
 Timings used in this sketch still have to be adapted to the bike escpecially the times used in the turn signals to fill the
 strip up and the pulse monitoring before dropping the turn signal

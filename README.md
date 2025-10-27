@@ -42,6 +42,7 @@ For this setup we need to bring 5 wires to the box:
 * Left turn signal
 * Right turnsignal
 * Brake light
+
   I bought some water proof connecters but also a 5 pin trailer wiring harness. which I probably hide somewhere under the seat.
   I did buy a Plug&Play wiring harness from Admore Lighting, installation on my 2014 C14 was done within 30 minutes.
   For this I needed to remove the toolbox, 4x 4mm allen bolts. Remove a clipped on fusebox from the toolbox. Behind the toolbox is the ECU that is just resting on some rubbers. To remove the ECU there is no need to disconnect the cables, just lift it and pull forward.

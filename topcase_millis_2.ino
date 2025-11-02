@@ -100,8 +100,8 @@ unsigned long lastPulseTime = 0;
 unsigned long lastPulseTimeL = 0;
 unsigned long lastPulseTimeR = 0;
 unsigned long lastPulseTimeB = 0;
-const unsigned long pulseHoldTime = 750UL; // Time to hold the pulse after last input signal, for turnsignals.
-byte interval = 100;
+const unsigned long pulseHoldTime = 500UL; // Time to hold the pulse after last input signal, for turnsignals.
+byte interval = 75;
 
 // Some booleans for status
 bool flash = false;
@@ -120,7 +120,7 @@ byte brakeCounter;
   byte x = 0;
 
 void setup() {
-  //Serial.begin(9600);
+  Serial.begin(9600);
   //Defining LED-strips
   FastLED.addLeds<LED_TYPE, 2,GRB>(leds[0], NUM_LEDS_L);   // This sets up the left strip to use Pin 2 using the leds aray (defined earlier)
   FastLED.addLeds<LED_TYPE, 3,GRB>(leds[1], NUM_LEDS_L);   // This sets up the left strip to use Pin 3 using the leds aray (defined earlier)
@@ -291,7 +291,7 @@ void brake() {
   brakeSet = true;
   // 3 flashes then stays on till brake is released
   unsigned long currentMillis = millis();           // Get the current time, local variable
-  if (isBraking && (isRBlinking || isLBlinking)) {
+  if (isBraking && (isRBlinking||isLBlinking)) {
     if (isRBlinking) {
       fill_solid(leds[1],9,CRGB::Color_high);       // Set left side brake lights on
       fill_solid(leds[3],8,CRGB::Color_high);       // Set left side brake lights on
@@ -352,7 +352,10 @@ void rightTurn() {
   }
   if (isRBlinking){
     if (current_led == 9) {
-      FastLED.clear();
+      //FastLED.clear();
+      fill_solid(leds[0],9,CRGB::Black);
+      fill_solid(leds[2],8,CRGB::Black);
+      fill_solid(leds[4],6,CRGB::Black);
     }
     unsigned long currentMillis = millis();          // Get the current time, local variable
     if (currentMillis - lastBlinkRTime >= interval){ // Check elapsed time since last blink
@@ -399,7 +402,10 @@ void leftTurn() { //by passing a bit this could work left and right
 
   if (isLBlinking){
     if (current_led == 9) {
-      FastLED.clear();
+      //FastLED.clear();
+      fill_solid(leds[1],9,CRGB::Black);
+      fill_solid(leds[3],8,CRGB::Black);
+      fill_solid(leds[5],6,CRGB::Black);
     }
     unsigned long currentMillis = millis();
     if (currentMillis - lastBlinkLTime >= interval){

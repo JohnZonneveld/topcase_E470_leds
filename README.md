@@ -29,7 +29,7 @@ This setup will provide:
 * Running lights (dimmed, only outside LEDs)
 * Brake light (both sides on, warning flash at start. All LEDs)
 * Turn signal (one side all LEDs sequential flashing, other side running lights unless braking then other side is solid on
-  (with start flash).)
+  )
 * Hazard light (both sides sequential flashing from inside to outside)
 
 This can obviously be customized as needed.  To convert the 12V signals to the Arduino Inputs 5V signal I used optocouplers.
@@ -55,5 +55,6 @@ strip up and the pulse monitoring before dropping the turn signal
 This will be the view when system is in rest (no inputs from signals or brake)
 
 ![img](e470_runninglights.PNG)
+
 
 

@@ -93,6 +93,7 @@ int current_led = NUM_LEDS;
 // using unsigned longs as they can only be positive number but can grow pretty quick
 // unsigned long is 4 byte big and can store o to 4,294,967,295
 unsigned long brakeMillis = 0;
+const unsigned long brakeFlashMillisQ = 125UL; // value isn't changing, hence the const
 const unsigned long brakeFlashMillis = 250UL; // value isn't changing, hence the const
 unsigned long lastBlinkRTime = 0;
 unsigned long lastBlinkLTime = 0;
@@ -100,8 +101,8 @@ unsigned long lastPulseTime = 0;
 unsigned long lastPulseTimeL = 0;
 unsigned long lastPulseTimeR = 0;
 unsigned long lastPulseTimeB = 0;
-const unsigned long pulseHoldTime = 750UL; // Time to hold the pulse after last input signal, for turnsignals.
-byte interval = 100;
+const unsigned long pulseHoldTime = 500UL; // Time to hold the pulse after last input signal, for turnsignals.
+byte interval = 75;
 
 // Some booleans for status
 bool flash = false;
@@ -120,7 +121,7 @@ byte brakeCounter;
   byte x = 0;
 
 void setup() {
-  //Serial.begin(9600);
+  Serial.begin(9600);
   //Defining LED-strips
   FastLED.addLeds<LED_TYPE, 2,GRB>(leds[0], NUM_LEDS_L);   // This sets up the left strip to use Pin 2 using the leds aray (defined earlier)
   FastLED.addLeds<LED_TYPE, 3,GRB>(leds[1], NUM_LEDS_L);   // This sets up the left strip to use Pin 3 using the leds aray (defined earlier)
@@ -289,9 +290,10 @@ void resetBrake(){
 
 void brake() {
   brakeSet = true;
-  // 3 flashes then stays on till brake is released
+  // 5 flashes then stays on till brake is released
+  Serial.println(brakeCounter);
   unsigned long currentMillis = millis();           // Get the current time, local variable
-  if (isBraking && (isRBlinking || isLBlinking)) {
+  if (isBraking && (isRBlinking||isLBlinking)) {
     if (isRBlinking) {
       fill_solid(leds[1],9,CRGB::Color_high);       // Set left side brake lights on
       fill_solid(leds[3],8,CRGB::Color_high);       // Set left side brake lights on
@@ -303,9 +305,15 @@ void brake() {
       fill_solid(leds[4],6,CRGB::Color_high);       // Set right side brake lights on
     }
   } else if (isBraking){                                  // If brake is active
-    if (currentMillis - brakeMillis > brakeFlashMillis) { // Check elapsed time since last flash
+    if ((currentMillis - brakeMillis > brakeFlashMillisQ && brakeCounter <= 6)) { // Check elapsed time since last flash
       flash = ! flash;                                    // Toggle the flash state  
-      if(brakeCounter < 7) {                              // Check if we are still in the flashing phase, number is double the number of flashes
+      brakeCounter++;                                   // Increment the brake flash counter  
+      brakeMillis = currentMillis;                   // Update last flash time to current time  
+    }
+    if ((currentMillis - brakeMillis > brakeFlashMillis && brakeCounter > 6)) { // Check elapsed time since last flash
+      Serial.println(brakeCounter);
+      flash = ! flash;                                    // Toggle the flash state  
+      if(brakeCounter < 13) {                              // Check if we are still in the flashing phase, number is double the number of flashes
         brakeCounter++;                                   // Increment the brake flash counter  
       }
       brakeMillis = currentMillis;                   // Update last flash time to current time  
@@ -318,7 +326,7 @@ void brake() {
         fill_solid(leds[3],8,CRGB::Color_high);
         fill_solid(leds[5],6,CRGB::Color_high);
       } else {
-      if (brakeCounter <= 6) {                       // During flashing phase, turn off all LEDs until we exceed the counter
+      if (brakeCounter <= 12) {                       // During flashing phase, turn off all LEDs until we exceed the counter
         if (isLBlinking){                            // If left turn is active, only turn off righ side LEDs 
           fill_solid(leds[0],9,CRGB::Black);
           fill_solid(leds[2],8,CRGB::Black);
@@ -352,7 +360,10 @@ void rightTurn() {
   }
   if (isRBlinking){
     if (current_led == 9) {
-      FastLED.clear();
+      //FastLED.clear();
+      fill_solid(leds[0],9,CRGB::Black);
+      fill_solid(leds[2],8,CRGB::Black);
+      fill_solid(leds[4],6,CRGB::Black);
     }
     unsigned long currentMillis = millis();          // Get the current time, local variable
     if (currentMillis - lastBlinkRTime >= interval){ // Check elapsed time since last blink
@@ -399,7 +410,10 @@ void leftTurn() { //by passing a bit this could work left and right
 
   if (isLBlinking){
     if (current_led == 9) {
-      FastLED.clear();
+      //FastLED.clear();
+      fill_solid(leds[1],9,CRGB::Black);
+      fill_solid(leds[3],8,CRGB::Black);
+      fill_solid(leds[5],6,CRGB::Black);
     }
     unsigned long currentMillis = millis();
     if (currentMillis - lastBlinkLTime >= interval){

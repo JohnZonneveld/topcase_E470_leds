@@ -420,44 +420,6 @@ void rightTurn() {
     current_led=NUM_LEDS;
     FastLED.show();
   }
-  Serial.println(blinkInterval);
-  // if (isRBlinking){
-  //   if (current_led == 9) {
-  //     //FastLED.clear();
-  //     fill_solid(leds[0],9,CRGB::Black);
-  //     fill_solid(leds[2],8,CRGB::Black);
-  //     fill_solid(leds[4],6,CRGB::Black);
-  //   }
-  //   unsigned long currentMillis = millis();          // Get the current time, local variable
-  //   if (currentMillis - lastBlinkRTime >= interval/10){ // Check elapsed time since last blink
-  //     lastBlinkRTime = currentMillis;                // Update last blink time to current time
-  //     current_led--;
-  //     if (current_led >= 0){
-  //       leds[0][current_led]=CRGB::Red;
-  //     if (current_led <= 7){
-  //       leds[2][current_led]=CRGB::Red;
-  //     }
-  //     if (current_led <= 6){
-  //       if (current_led -1 >= 0){
-  //         leds[4][current_led-1]=CRGB::Red;
-  //       }
-  //     }
-  //     FastLED.show();
-  //     } else if (current_led < 0){              // If all LEDs have been lit turn them off and reset
-  //       current_led=NUM_LEDS;
-  //       fill_solid(leds[0],9,CRGB::Black);
-  //       fill_solid(leds[2],8,CRGB::Black);
-  //       fill_solid(leds[4],6,CRGB::Black);
-  //       FastLED.show();
-  //     }
-  //   }
-  // } else {
-  //   fill_solid(leds[0],9,CRGB::Black);
-  //   fill_solid(leds[2],8,CRGB::Black);
-  //   fill_solid(leds[4],6,CRGB::Black);
-  //   current_led=NUM_LEDS;
-  //   FastLED.show();
-  // }
 }
 
 void leftTurn() { //by passing a bit this could work left and right

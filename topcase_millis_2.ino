@@ -65,8 +65,8 @@ strip up and the pulse monitoring before dropping the turn signal
 #define NUM_STRIPS 6                     // Define the number of LED strips being used.
 
 // Settings for brightness levels
-#define bright 200                       // Define the level for bright
-#define dim 40                           // Define the level for dim
+#define bright 250                       // Define the level for bright
+#define dim 80                           // Define the level for dim
 
 // Define Full brightness, max 255, all colors
 #define r bright
@@ -93,16 +93,18 @@ int current_led = NUM_LEDS;
 // using unsigned longs as they can only be positive number but can grow pretty quick
 // unsigned long is 4 byte big and can store o to 4,294,967,295
 unsigned long brakeMillis = 0;
-const unsigned long brakeFlashMillisQ = 125UL; // value isn't changing, hence the const
-const unsigned long brakeFlashMillis = 250UL; // value isn't changing, hence the const
+const unsigned long brakeFlashMillisQ = 67UL; // value isn't changing, hence the const
+const unsigned long brakeFlashMillis = 267UL; // value isn't changing, hence the const
 unsigned long lastBlinkRTime = 0;
 unsigned long lastBlinkLTime = 0;
 unsigned long lastPulseTime = 0;
 unsigned long lastPulseTimeL = 0;
 unsigned long lastPulseTimeR = 0;
 unsigned long lastPulseTimeB = 0;
-const unsigned long pulseHoldTime = 500UL; // Time to hold the pulse after last input signal, for turnsignals.
-byte interval = 75;
+unsigned long blinkRStartAllOnTime = 0;
+unsigned long blinkRStartAllOffTime = 0;
+const unsigned long pulseHoldTime = 1000UL; // Time to hold the pulse after last input signal, for turnsignals.
+unsigned long blinkInterval = 150;
 
 // Some booleans for status
 bool flash = false;
@@ -115,6 +117,12 @@ bool brakeSet = false;
 bool runStateR = false;
 bool runStateL= false;
 bool runHasBeenOn = false;
+bool blink;
+bool allOffRPhase = false;
+bool allOnRPhase = false;
+
+//volatile unsigned long lastPulseTime = 0;
+volatile unsigned long timeBetweenPulses = 0;
 
 // using byte to preserve memory
 byte brakeCounter;
@@ -167,8 +175,8 @@ void setup() {
     leds[1][i] = Color_low;                   // Set strip LED color to the chosen color.
     leds[2][i] = Color_low;                   // Set strip LED color to the chosen color.
     leds[3][i] = Color_low;                   // Set strip LED color to the chosen color.
-    leds[4][i-1] = Color_low;                   // Set strip LED color to the chosen color.
-    leds[5][i-1] = Color_low;                   // Set strip LED color to the chosen color.
+    leds[4][i-1] = Color_low;                 // Set strip LED color to the chosen color.
+    leds[5][i-1] = Color_low;                 // Set strip LED color to the chosen color.
     FastLED.show(); 
     delay(150);                               // Show the set colors. 
   }
@@ -201,12 +209,15 @@ void setup() {
 }
 
 void loop() {
+
   // Here we read the input pin for the right turn signal and have a wait period to see if signal is still active.
   // This to bridge the off-time of the turnsignal.
   if (digitalRead(rightPin) == HIGH){          // If right turn signal is active
     lastPulseTimeR = millis();                 // Update the last pulse time to current time
     isRBlinking = true;                        // Set the right blinking state to true
     runStateR =false;                          // Set running light right state to false
+  } else if (isRBlinking) {
+    blinkInterval = millis() -  lastPulseTimeR;
   }
   if (millis() - lastPulseTimeR >= pulseHoldTime){ // Check if the time since last pulse exceeds the hold time
     isRBlinking = false;                       // If exceeded, set right blinking state to false
@@ -217,6 +228,8 @@ void loop() {
     lastPulseTimeL = millis();                 // Update the last pulse time to current time
     isLBlinking = true;                        // Set the left blinking state to true
     runStateL =false;                          // Set running light left state to false
+  } else if (isLBlinking) {
+    blinkInterval = millis() - lastPulseTimeL;
   }
   if (millis() - lastPulseTimeL >= pulseHoldTime){ // Check if the time since last pulse exceeds the hold time
     isLBlinking = false;                       // If exceeded, set left blinking state to false
@@ -247,25 +260,31 @@ void loop() {
     brake();
     break;
   case 2:                                      // Right turn only
+    blinkRelay();
     rightTurn();                               // Call rightTurn function
     runLeft();                                 // Run left side running lights
     break;
   case 3:                                      // Brake and RightTurn
+    blinkRelay();
     brake();                                   // Call brake function
     rightTurn();                               // Call rightTurn function
     break;
   case 4:                                      // Left turn
+    blinkRelay();
     leftTurn();                                // Call leftTurn function
     runRight();                                // Run right side running lights
     break;
   case 5:                                      // Brake and Left turn
+    blinkRelay();
     brake();                                   // Call brake function
     leftTurn();                                // Call leftTurn function
     break;
   case 6:                                      // Hazards
+    blinkRelay();
     hazards();
     break;
   case 7:                                      // Brake and Hazards
+    blinkRelay();
     hazards();                                 // Call hazards function, brake will be ignored as hazards override brake
     break;
   } // END CASE
@@ -273,6 +292,10 @@ void loop() {
 
  
 }// END LOOP
+
+// void blink(){
+  
+// }
 
 void resetBrake(){
   if (brakeSet){
@@ -349,16 +372,18 @@ void brake() {
   }
 }  
 
-void rightTurn() { 
-  if (!turnStateR) {
-    fill_solid(leds[0],9,CRGB::Black);
-    fill_solid(leds[2],8,CRGB::Black);
-    fill_solid(leds[4],6,CRGB::Black);
-    FastLED.show();
-    turnStateR = true;
-    current_led = 9;
+void blinkRelay(){
+  if (digitalRead(rightPin) || digitalRead(leftPin)) {
+    blink = true;
+  } else {
+    blink = false;
   }
-  if (isRBlinking){
+  
+}
+
+void rightTurn() { 
+  Serial.print("blink: ");Serial.println(blink);
+  if (blink) {
     if (current_led == 9) {
       //FastLED.clear();
       fill_solid(leds[0],9,CRGB::Black);
@@ -366,7 +391,7 @@ void rightTurn() {
       fill_solid(leds[4],6,CRGB::Black);
     }
     unsigned long currentMillis = millis();          // Get the current time, local variable
-    if (currentMillis - lastBlinkRTime >= interval){ // Check elapsed time since last blink
+    if (currentMillis - lastBlinkRTime >= blinkInterval/10){ // Check elapsed time since last blink
       lastBlinkRTime = currentMillis;                // Update last blink time to current time
       current_led--;
       if (current_led >= 0){
@@ -395,20 +420,49 @@ void rightTurn() {
     current_led=NUM_LEDS;
     FastLED.show();
   }
+  Serial.println(blinkInterval);
+  // if (isRBlinking){
+  //   if (current_led == 9) {
+  //     //FastLED.clear();
+  //     fill_solid(leds[0],9,CRGB::Black);
+  //     fill_solid(leds[2],8,CRGB::Black);
+  //     fill_solid(leds[4],6,CRGB::Black);
+  //   }
+  //   unsigned long currentMillis = millis();          // Get the current time, local variable
+  //   if (currentMillis - lastBlinkRTime >= interval/10){ // Check elapsed time since last blink
+  //     lastBlinkRTime = currentMillis;                // Update last blink time to current time
+  //     current_led--;
+  //     if (current_led >= 0){
+  //       leds[0][current_led]=CRGB::Red;
+  //     if (current_led <= 7){
+  //       leds[2][current_led]=CRGB::Red;
+  //     }
+  //     if (current_led <= 6){
+  //       if (current_led -1 >= 0){
+  //         leds[4][current_led-1]=CRGB::Red;
+  //       }
+  //     }
+  //     FastLED.show();
+  //     } else if (current_led < 0){              // If all LEDs have been lit turn them off and reset
+  //       current_led=NUM_LEDS;
+  //       fill_solid(leds[0],9,CRGB::Black);
+  //       fill_solid(leds[2],8,CRGB::Black);
+  //       fill_solid(leds[4],6,CRGB::Black);
+  //       FastLED.show();
+  //     }
+  //   }
+  // } else {
+  //   fill_solid(leds[0],9,CRGB::Black);
+  //   fill_solid(leds[2],8,CRGB::Black);
+  //   fill_solid(leds[4],6,CRGB::Black);
+  //   current_led=NUM_LEDS;
+  //   FastLED.show();
+  // }
 }
 
 void leftTurn() { //by passing a bit this could work left and right
   
-  if (!turnStateL) {
-    fill_solid(leds[1],9,CRGB::Black);
-    fill_solid(leds[3],8,CRGB::Black);
-    fill_solid(leds[5],6,CRGB::Black);
-    FastLED.show();
-    turnStateL = true;
-    current_led = 9;
-  }
-
-  if (isLBlinking){
+  if (blink){
     if (current_led == 9) {
       //FastLED.clear();
       fill_solid(leds[1],9,CRGB::Black);
@@ -416,7 +470,7 @@ void leftTurn() { //by passing a bit this could work left and right
       fill_solid(leds[5],6,CRGB::Black);
     }
     unsigned long currentMillis = millis();
-    if (currentMillis - lastBlinkLTime >= interval){
+    if (currentMillis - lastBlinkLTime >= blinkInterval/10){
       lastBlinkLTime = currentMillis;
       current_led--;
       if (current_led >= 0){
@@ -465,7 +519,7 @@ void hazards() {
 
   if (isRBlinking){
     unsigned long currentMillis = millis();
-    if (currentMillis - lastBlinkRTime >= interval){
+    if (currentMillis - lastBlinkRTime >= blinkInterval){
       lastBlinkRTime = currentMillis;
       current_led--;
       if (current_led >= 0){

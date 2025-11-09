@@ -328,15 +328,15 @@ void brake() {
       fill_solid(leds[4],6,CRGB::Color_high);       // Set right side brake lights on
     }
   } else if (isBraking){                                  // If brake is active
-    if ((currentMillis - brakeMillis > brakeFlashMillisQ && brakeCounter <= 6)) { // Check elapsed time since last flash
+    if ((currentMillis - brakeMillis > brakeFlashMillisQ && brakeCounter <= 8)) { // Check elapsed time since last flash
       flash = ! flash;                                    // Toggle the flash state  
       brakeCounter++;                                   // Increment the brake flash counter  
       brakeMillis = currentMillis;                   // Update last flash time to current time  
     }
-    if ((currentMillis - brakeMillis > brakeFlashMillis && brakeCounter > 6)) { // Check elapsed time since last flash
+    if ((currentMillis - brakeMillis > brakeFlashMillis && brakeCounter > 8)) { // Check elapsed time since last flash
       Serial.println(brakeCounter);
       flash = ! flash;                                    // Toggle the flash state  
-      if(brakeCounter < 13) {                              // Check if we are still in the flashing phase, number is double the number of flashes
+      if(brakeCounter < 17) {                              // Check if we are still in the flashing phase, number is double the number of flashes
         brakeCounter++;                                   // Increment the brake flash counter  
       }
       brakeMillis = currentMillis;                   // Update last flash time to current time  
@@ -349,7 +349,7 @@ void brake() {
         fill_solid(leds[3],8,CRGB::Color_high);
         fill_solid(leds[5],6,CRGB::Color_high);
       } else {
-      if (brakeCounter <= 12) {                       // During flashing phase, turn off all LEDs until we exceed the counter
+      if (brakeCounter <= 16) {                       // During flashing phase, turn off all LEDs until we exceed the counter
         if (isLBlinking){                            // If left turn is active, only turn off righ side LEDs 
           fill_solid(leds[0],9,CRGB::Black);
           fill_solid(leds[2],8,CRGB::Black);
@@ -391,7 +391,7 @@ void rightTurn() {
       fill_solid(leds[4],6,CRGB::Black);
     }
     unsigned long currentMillis = millis();          // Get the current time, local variable
-    if (currentMillis - lastBlinkRTime >= blinkInterval/10){ // Check elapsed time since last blink
+    if (currentMillis - lastBlinkRTime >= blinkInterval/12){ // Check elapsed time since last blink
       lastBlinkRTime = currentMillis;                // Update last blink time to current time
       current_led--;
       if (current_led >= 0){
@@ -470,7 +470,7 @@ void leftTurn() { //by passing a bit this could work left and right
       fill_solid(leds[5],6,CRGB::Black);
     }
     unsigned long currentMillis = millis();
-    if (currentMillis - lastBlinkLTime >= blinkInterval/10){
+    if (currentMillis - lastBlinkLTime >= blinkInterval/12){
       lastBlinkLTime = currentMillis;
       current_led--;
       if (current_led >= 0){

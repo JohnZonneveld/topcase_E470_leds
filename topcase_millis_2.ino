@@ -129,7 +129,6 @@ byte brakeCounter;
   byte x = 0;
 
 void setup() {
-  Serial.begin(9600);
   //Defining LED-strips
   FastLED.addLeds<LED_TYPE, 2,GRB>(leds[0], NUM_LEDS_L);   // This sets up the left strip to use Pin 2 using the leds aray (defined earlier)
   FastLED.addLeds<LED_TYPE, 3,GRB>(leds[1], NUM_LEDS_L);   // This sets up the left strip to use Pin 3 using the leds aray (defined earlier)
@@ -314,7 +313,6 @@ void resetBrake(){
 void brake() {
   brakeSet = true;
   // 5 flashes then stays on till brake is released
-  Serial.println(brakeCounter);
   unsigned long currentMillis = millis();           // Get the current time, local variable
   if (isBraking && (isRBlinking||isLBlinking)) {
     if (isRBlinking) {
@@ -327,21 +325,20 @@ void brake() {
       fill_solid(leds[2],8,CRGB::Color_high);       // Set right side brake lights on
       fill_solid(leds[4],6,CRGB::Color_high);       // Set right side brake lights on
     }
-  } else if (isBraking){                                  // If brake is active
+  } else if (isBraking){                            // If brake is active
     if ((currentMillis - brakeMillis > brakeFlashMillisQ && brakeCounter <= 8)) { // Check elapsed time since last flash
-      flash = ! flash;                                    // Toggle the flash state  
-      brakeCounter++;                                   // Increment the brake flash counter  
-      brakeMillis = currentMillis;                   // Update last flash time to current time  
+      flash = ! flash;                              // Toggle the flash state  
+      brakeCounter++;                               // Increment the brake flash counter  
+      brakeMillis = currentMillis;                  // Update last flash time to current time  
     }
     if ((currentMillis - brakeMillis > brakeFlashMillis && brakeCounter > 8)) { // Check elapsed time since last flash
-      Serial.println(brakeCounter);
-      flash = ! flash;                                    // Toggle the flash state  
-      if(brakeCounter < 17) {                              // Check if we are still in the flashing phase, number is double the number of flashes
-        brakeCounter++;                                   // Increment the brake flash counter  
+      flash = ! flash;                              // Toggle the flash state  
+      if(brakeCounter < 17) {                       // Check if we are still in the flashing phase, number is double the number of flashes
+        brakeCounter++;                             // Increment the brake flash counter  
       }
-      brakeMillis = currentMillis;                   // Update last flash time to current time  
+      brakeMillis = currentMillis;                  // Update last flash time to current time  
     }
-    if (flash == 1) {                                // If flash state is on, turn on all LEDs
+    if (flash == 1) {                               // If flash state is on, turn on all LEDs
         fill_solid(leds[0],9,CRGB::Color_high);
         fill_solid(leds[2],8,CRGB::Color_high);
         fill_solid(leds[4],6,CRGB::Color_high);
@@ -349,7 +346,7 @@ void brake() {
         fill_solid(leds[3],8,CRGB::Color_high);
         fill_solid(leds[5],6,CRGB::Color_high);
       } else {
-      if (brakeCounter <= 16) {                       // During flashing phase, turn off all LEDs until we exceed the counter
+      if (brakeCounter <= 16) {                      // During flashing phase, turn off all LEDs until we exceed the counter
         if (isLBlinking){                            // If left turn is active, only turn off righ side LEDs 
           fill_solid(leds[0],9,CRGB::Black);
           fill_solid(leds[2],8,CRGB::Black);
@@ -378,11 +375,10 @@ void blinkRelay(){
   } else {
     blink = false;
   }
-  
 }
 
 void rightTurn() { 
-  Serial.print("blink: ");Serial.println(blink);
+  //Serial.print("blink: ");Serial.println(blink);
   if (blink) {
     if (current_led == 9) {
       //FastLED.clear();
@@ -467,52 +463,43 @@ void leftTurn() { //by passing a bit this could work left and right
 }
 
 void hazards() { 
-  if (!turnStateR) {
-    fill_solid(leds[0],9,CRGB::Black);
-    fill_solid(leds[2],8,CRGB::Black);
-    fill_solid(leds[4],6,CRGB::Black);
-    fill_solid(leds[1],9,CRGB::Black);
-    fill_solid(leds[3],8,CRGB::Black);
-    fill_solid(leds[5],6,CRGB::Black);
-    FastLED.show();
-    turnStateR = true;
-    current_led = 9;
-  }
-
-  if (isRBlinking){
+  if (blink){
     unsigned long currentMillis = millis();
-    if (currentMillis - lastBlinkRTime >= blinkInterval){
-      lastBlinkRTime = currentMillis;
+    if (currentMillis - lastBlinkRTime >= blinkInterval/12){ // Check elapsed time since last blink
+      lastBlinkRTime = currentMillis;                // Update last blink time to current time
       current_led--;
       if (current_led >= 0){
         leds[0][current_led]=CRGB::Red;
-        leds[2][current_led]=CRGB::Red;
-        leds[4][current_led-1]=CRGB::Red;
-      if (current_led <= 8){
         leds[1][current_led]=CRGB::Red;
+      if (current_led <= 7){
+        leds[2][current_led]=CRGB::Red;
         leds[3][current_led]=CRGB::Red;
-        leds[5][current_led-1]=CRGB::Red;
+      }
+      if (current_led <= 6){
+        if (current_led -1 >= 0){
+          leds[4][current_led-1]=CRGB::Red;
+          leds[5][current_led-1]=CRGB::Red;
+        }
+      }
+      //FastLED.show();
+      } else if (current_led < 0){              // If all LEDs have been lit turn them off and reset
+        current_led=NUM_LEDS;
+        fill_solid(leds[0],9,CRGB::Black);
+        fill_solid(leds[2],8,CRGB::Black);
+        fill_solid(leds[4],6,CRGB::Black);
+        fill_solid(leds[1],9,CRGB::Black);
+        fill_solid(leds[3],8,CRGB::Black);
+        fill_solid(leds[5],6,CRGB::Black);
+        //FastLED.show();
       }
       FastLED.show();
     }
-    else if (current_led < 0){
-      current_led=NUM_LEDS;
-      fill_solid(leds[0],9,CRGB::Black);
-      fill_solid(leds[1],9,CRGB::Black);
-      fill_solid(leds[2],8,CRGB::Black);
-      fill_solid(leds[3],8,CRGB::Black);
-      fill_solid(leds[4],6,CRGB::Black);
-      fill_solid(leds[5],6,CRGB::Black);
-      FastLED.show();
-    }
-
-    }
   } else {
     fill_solid(leds[0],9,CRGB::Black);
-    fill_solid(leds[1],9,CRGB::Black);
     fill_solid(leds[2],8,CRGB::Black);
-    fill_solid(leds[3],8,CRGB::Black);
     fill_solid(leds[4],6,CRGB::Black);
+    fill_solid(leds[1],9,CRGB::Black);
+    fill_solid(leds[3],8,CRGB::Black);
     fill_solid(leds[5],6,CRGB::Black);
     current_led=NUM_LEDS;
     FastLED.show();

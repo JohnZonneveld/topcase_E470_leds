@@ -71,4 +71,7 @@ What I measured was 35 frames-66 frames - 65 frames. Because of that the first s
 I am thinking of measuring the exact times between the rise of the turnsignal input signal but am not 100% sure if the on time is exactly the same as the offtime.
 I have noticed now that sometimes before the LEDs turn off before the next cycle the previous cycle already started with a new sequential pattern but that should be an easy fix not to start a new sequential pattern after the LEDs have been filled and have been turned off.
 
-Work in progress...
+Turnsignal has been adjusted now and runs synchronous with the bikes turnsignal. Only the first 'blink' is short due to the nature of the turnsignal relay behavior.
+Last update from last weekend is that now also the hazars are in sync with the turnsignal with the same first 'blink' behavior.
+
+So only 'problem' that remains is the different behavior of the brake light. The patterns are the same for the brakelight modulator and the Arduino. Somehow however the brakelight modulator startup is not reliable, causing it to start not consistent. This causes that the blink patterns could be slightly out of sync. This however might assist in however of getting noticed better that you are braking.
